@@ -1,0 +1,60 @@
+# Illustrative only: synthetic values, not an executable deployment manifest.
+# Map each Salesforce object to an AppFlow flow and an S3 landing prefix.
+flows:
+  - flow_name: Demo__Account
+    source:
+      connector: salesforce
+      object: Account
+      connector_profile_ref: salesforce-sandbox-profile
+      api_mode: automatic
+      trigger: on_demand
+    extraction:
+      mode: incremental
+      filter_field: LastModifiedDate
+      initial_load_policy: approved_full_load
+      overlap_minutes: 5
+    destination:
+      service: s3
+      bucket: example-data-lake
+      prefix: salesforce/account/
+      format: json
+      execution_scoped: true
+    fields:
+      strategy: explicit_allowlist
+      include:
+        - Id
+        - Name
+        - LastModifiedDate
+    governance:
+      classification: internal-example
+      owner: data-platform
+      retention_days: 30
+
+  - flow_name: Demo__CaseHistory
+    source:
+      connector: salesforce
+      object: CaseHistory
+      connector_profile_ref: salesforce-sandbox-profile
+      api_mode: automatic
+      trigger: on_demand
+    extraction:
+      mode: incremental
+      filter_field: CreatedDate
+      initial_load_policy: bounded_lookback
+      overlap_minutes: 5
+    destination:
+      service: s3
+      bucket: example-data-lake
+      prefix: salesforce/case-history/
+      format: json
+      execution_scoped: true
+    fields:
+      strategy: explicit_allowlist
+      include:
+        - Id
+        - CreatedDate
+        - Field
+    governance:
+      classification: internal-example
+      owner: data-platform
+      retention_days: 30
